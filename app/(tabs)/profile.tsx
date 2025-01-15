@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, View, Text, StyleSheet } from 'react-native';
 
-export default function HomeScreen() {
+export default function Profile() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -15,9 +15,9 @@ export default function HomeScreen() {
       {/* Konten */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.content}>
-          <Text style={styles.label}>Hello, ...</Text>
+          <Text style={styles.label}>Nama:</Text>
           <Text style={styles.value}></Text>
-          <Text style={styles.label}>Your Course</Text>
+          <Text style={styles.label}>Kelas:</Text>
           <Text style={styles.value}></Text>
         </View>
       </ScrollView>
@@ -60,4 +60,3 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 });
-
