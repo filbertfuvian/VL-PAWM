@@ -5,6 +5,7 @@ import HomeScreen from './index';
 import CourseScreen from './course';
 import ProfileScreen from './profile';
 import CourseDetails from '../course/courseDetails';
+import CourseJoin from '../course/courseJoin';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -17,6 +18,7 @@ function CourseStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Courses" component={CourseScreen} />
       <Stack.Screen name="CourseDetails" component={CourseDetails} />
+      <Stack.Screen name="CourseJoin" component={CourseJoin} />
     </Stack.Navigator>
   );
 }

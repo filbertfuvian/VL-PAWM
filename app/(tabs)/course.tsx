@@ -1,67 +1,41 @@
 import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, Image, View, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-// Placeholder data for course cards
-const courses = [
-  {
-    title: 'React Native Basics',
-    description: 'Learn the basics of React Native, a popular framework for building mobile apps.',
-    image: require('@/assets/images/course-template.png'),
-  },
-  {
-    title: 'Advanced React Native',
-    description: 'Dive deeper into React Native and learn advanced techniques and patterns.',
-    image: require('@/assets/images/course-template.png'),
-  },
-  // Add more courses as needed
-];
+import { useAuth } from '@/hooks/useAuth';
+import { useCourses } from '@/hooks/useCourses';
 
 export default function CourseScreen() {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useAuth();
+  const { courses, userCourseJoined } = useCourses();
 
-  const handleCoursePress = () => {
-    navigation.navigate('CourseDetails');
+  const handleCoursePress = async (courseId: string) => {
+    if (!user) return;
+    const isJoined = await userCourseJoined(user.uid, courseId);
+    if (isJoined) {
+      navigation.navigate('courseDetails', { courseId });
+    } else {
+      navigation.navigate('courseJoin', { courseId });
+    }
   };
 
-  // Filter courses based on search query
   const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchQuery.toLowerCase())
+    course.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Courses</Text>
-      </View>
-
-      {/* Garis Pemisah */}
-      <View style={styles.separator} />
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search courses..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      {/* Konten */}
-      <ScrollView contentContainerStyle={styles.gridContainer}>
-        {filteredCourses.map((course, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.card}
-            onPress={handleCoursePress}
-          >
-            <Image source={course.image} style={styles.cardImage} />
-            <Text style={styles.cardTitle}>{course.title}</Text>
-            <Text style={styles.cardDescription}>{course.description}</Text>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        {filteredCourses.map(course => (
+          <TouchableOpacity key={course.id} onPress={() => handleCoursePress(course.id)}>
+            <View style={styles.courseCard}>
+              <Image
+                source={{ uri: `data:image/png;base64,${course.image}` }}
+                style={styles.courseImage}
+              />
+              <Text style={styles.courseName}>{course.name}</Text>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -72,56 +46,24 @@ export default function CourseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
-  header: {
+  contentContainer: {
     padding: 16,
   },
-  headerText: {
-    fontSize: 24,
+  courseCard: {
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    alignItems: 'center',
+  },
+  courseImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 8,
+  },
+  courseName: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
-  },
-  separator: {
-    height: 1,
-    width: '100%',
-    backgroundColor: '#ddd',
-  },
-  searchContainer: {
-    padding: 16,
-  },
-  searchInput: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
-  },
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  card: {
-    width: '48%',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 20,
-  },
-  cardImage: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#888',
   },
 });
