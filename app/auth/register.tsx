@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { addUser } from '@/hooks/useUser';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/firebaseConfig';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -25,9 +27,11 @@ export default function RegisterScreen() {
         profilePicture: 'https://via.placeholder.com/100',
         phoneNumber: '',
         name: user.email,
-        createdAt: new Date(),
       };
       await addUser(user.uid, userData);
+
+      // Create an empty 'courses' subcollection for the new user
+      await setDoc(doc(db, 'users', user.uid, 'courses', 'placeholder'), {});
 
       router.replace('/');
     } catch (error: any) {

@@ -1,24 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, ScrollView, View, Text, StyleSheet } from 'react-native';
+import { useAuth } from '@/hooks/useAuth';
+import { getUser } from '@/hooks/useUser';
 
 export default function Profile() {
+  const { user } = useAuth();
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (!user) return;
+      const userData = await getUser(user.uid);
+      if (userData?.name) {
+        setUserName(userData.name);
+      }
+    };
+    fetchUserName();
+  }, [user]);
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Profile</Text>
       </View>
 
-      {/* Garis Pemisah */}
       <View style={styles.separator} />
 
-      {/* Konten */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.content}>
           <Text style={styles.label}>Nama:</Text>
-          <Text style={styles.value}></Text>
-          <Text style={styles.label}>Kelas:</Text>
-          <Text style={styles.value}></Text>
+          <Text style={styles.value}>{userName}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

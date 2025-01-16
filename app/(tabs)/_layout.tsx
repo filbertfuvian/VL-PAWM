@@ -17,8 +17,8 @@ function CourseStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Courses" component={CourseScreen} />
-      <Stack.Screen name="CourseDetails" component={CourseDetails} />
-      <Stack.Screen name="CourseJoin" component={CourseJoin} />
+      <Stack.Screen name="courseDetails" component={CourseDetails} />
+      <Stack.Screen name="courseJoin" component={CourseJoin} />
     </Stack.Navigator>
   );
 }
