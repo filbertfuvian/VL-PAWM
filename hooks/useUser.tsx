@@ -8,7 +8,6 @@ interface UserData {
   profilePicture?: string;
   phoneNumber?: string;
   createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export async function addUser(userId: string, userData: UserData): Promise<void> {
@@ -16,7 +15,6 @@ export async function addUser(userId: string, userData: UserData): Promise<void>
     const userDataWithTimestamp = {
       ...userData,
       createdAt: new Date(),
-      updatedAt: new Date()
     };
     await setDoc(doc(db, 'users', userId), userDataWithTimestamp);
     console.log('User data written with ID: ', userId);

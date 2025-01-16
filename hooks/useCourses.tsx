@@ -49,7 +49,7 @@ export function useCourses() {
       }
 
       const userCourseRef = doc(db, 'users', userId, 'courses', courseId);
-      await setDoc(userCourseRef, { status: 'ongoing' });
+      await setDoc(userCourseRef, { completed: false });
 
       const modulSnapshot = await getDocs(collection(courseRef, 'modul'));
       const quizSnapshot = await getDocs(collection(courseRef, 'quiz'));
@@ -58,12 +58,12 @@ export function useCourses() {
 
       modulSnapshot.forEach(modulDoc => {
         const userModulRef = doc(userCourseRef, 'modul', modulDoc.id);
-        batch.set(userModulRef, { done: false });
+        batch.set(userModulRef, { completed: false });
       });
 
       quizSnapshot.forEach(quizDoc => {
         const userQuizRef = doc(userCourseRef, 'quiz', quizDoc.id);
-        batch.set(userQuizRef, { done: false });
+        batch.set(userQuizRef, { completed: false });
       });
 
       await batch.commit();

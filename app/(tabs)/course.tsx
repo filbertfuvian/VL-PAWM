@@ -14,9 +14,9 @@ export default function CourseScreen() {
     if (!user) return;
     const isJoined = await userCourseJoined(user.uid, courseId);
     if (isJoined) {
-      navigation.navigate('courseDetails', { courseId });
+      navigation.navigate('CourseDetails', { courseId });
     } else {
-      navigation.navigate('courseJoin', { courseId });
+      navigation.navigate('CourseJoin', { courseId });
     }
   };
 
