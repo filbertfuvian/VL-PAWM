@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider , DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
-import { Stack } from 'expo-router';
+import { useRouter, Stack, Slot } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useColorScheme } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 
-
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { user, loading } = useAuth();
-  const [loaded, setLoaded] = useState(true); // Ubah sesuai kebutuhan
+  const [loaded, setLoaded] = useState(true);
   const router = useRouter();
   const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
@@ -39,10 +37,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="not-found" />
-      </Stack>
+      <Slot />
       <StatusBar style="auto" />
     </ThemeProvider>
   );
