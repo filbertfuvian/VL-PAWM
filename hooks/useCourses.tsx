@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { doc, getDoc, getDocs, collection, setDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, setDoc, writeBatch } from 'firebase/firestore';
 
 interface CourseData {
   id: string;
@@ -41,7 +41,32 @@ export function useCourses() {
 
   async function joinCourse(userId: string, courseId: string) {
     try {
-      await setDoc(doc(db, 'users', userId, 'courses', courseId), { status: 'ongoing' });
+      const courseRef = doc(db, 'courses', courseId);
+      const courseSnap = await getDoc(courseRef);
+
+      if (!courseSnap.exists()) {
+        throw new Error('Course does not exist');
+      }
+
+      const userCourseRef = doc(db, 'users', userId, 'courses', courseId);
+      await setDoc(userCourseRef, { status: 'ongoing' });
+
+      const modulSnapshot = await getDocs(collection(courseRef, 'modul'));
+      const quizSnapshot = await getDocs(collection(courseRef, 'quiz'));
+
+      const batch = writeBatch(db);
+
+      modulSnapshot.forEach(modulDoc => {
+        const userModulRef = doc(userCourseRef, 'modul', modulDoc.id);
+        batch.set(userModulRef, { done: false });
+      });
+
+      quizSnapshot.forEach(quizDoc => {
+        const userQuizRef = doc(userCourseRef, 'quiz', quizDoc.id);
+        batch.set(userQuizRef, { done: false });
+      });
+
+      await batch.commit();
     } catch (err) {
       console.error('Error joining course:', err);
     }
