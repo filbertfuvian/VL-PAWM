@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  ScrollView 
+} from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getDoc, doc, collection, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
@@ -33,6 +39,8 @@ export default function CourseDetails() {
             name: doc.data().name,
           }));
           setModules(modulData);
+        } else {
+          console.warn('Course document does not exist.');
         }
       } catch (err) {
         console.error('Error fetching course data:', err);
@@ -42,7 +50,11 @@ export default function CourseDetails() {
     fetchCourseData();
   }, [courseId]);
 
-  const handleModulePress = (moduleId: string) => {
+  const handleStartExam = () => {
+    navigation.navigate('CourseExam', { courseId });
+  };
+
+  const handleViewModule = (moduleId: string) => {
     navigation.navigate('CourseModule', { courseId, moduleId });
   };
 
@@ -54,18 +66,27 @@ export default function CourseDetails() {
           <Text style={styles.courseDescription}>{course.description}</Text>
           <Text style={styles.modulesHeader}>Modules</Text>
           {modules.length > 0 ? (
-            modules.map(module => (
-              <TouchableOpacity
-                key={module.id}
-                onPress={() => handleModulePress(module.id)}
-                style={styles.moduleButton}
-              >
-                <Text style={styles.moduleText}>{module.name}</Text>
-              </TouchableOpacity>
+            modules.map((module) => (
+              <View key={module.id} style={styles.moduleContainer}>
+                <Text style={styles.moduleName}>{module.name}</Text>
+                <TouchableOpacity
+                  style={styles.viewModuleButton}
+                  onPress={() => handleViewModule(module.id)}
+                >
+                  <Text style={styles.buttonText}>View Module</Text>
+                </TouchableOpacity>
+              </View>
             ))
           ) : (
             <Text style={styles.noModulesText}>No modules available.</Text>
           )}
+          {/* Start Exam Button */}
+          <TouchableOpacity
+            style={styles.startExamButton}
+            onPress={handleStartExam}
+          >
+            <Text style={styles.startExamButtonText}>Start Exam</Text>
+          </TouchableOpacity>
         </>
       )}
     </ScrollView>
@@ -92,14 +113,38 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
   },
-  moduleButton: {
+  moduleContainer: {
+    marginBottom: 16,
     padding: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
+  },
+  moduleName: {
+    fontSize: 18,
+    fontWeight: '600',
     marginBottom: 8,
   },
-  moduleText: {
+  viewModuleButton: {
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  startExamButton: {
+    padding: 16,
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  startExamButtonText: {
+    color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
   },
   noModulesText: {
     fontSize: 16,
