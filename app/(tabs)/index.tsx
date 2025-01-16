@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@/hooks/useAuth';
 import { getDocs, collection, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+
+const { width } = Dimensions.get('window');
+const numColumns = Platform.OS === 'web' ? 8 : 4;
+const rowsToShow = 2;
+const gap = 16;
+const cardWidth = (width - (gap * (numColumns + 1))) / numColumns;
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -11,6 +18,7 @@ export default function HomeScreen() {
   const [userName, setUserName] = useState('');
   const [ongoingCourses, setOngoingCourses] = useState([]);
   const [completedCourses, setCompletedCourses] = useState([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -78,10 +86,19 @@ export default function HomeScreen() {
     });
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const getDisplayedCourses = (courses) => {
+    if (isExpanded) return courses;
+    return courses.slice(0, numColumns * rowsToShow);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Profile</Text>
+        <Text style={styles.headerText}>InspiraLab</Text>
       </View>
 
       <View style={styles.separator} />
@@ -90,15 +107,27 @@ export default function HomeScreen() {
         <View style={styles.content}>
           <Text style={styles.label}>Hello, {userName}</Text>
           <Text style={styles.value}></Text>
+        </View>
+        
+        <View style={styles.content}>
           <Text style={styles.label}>Your Courses</Text>
-          {ongoingCourses.map(course => (
-            <TouchableOpacity key={course.id} onPress={() => handleCoursePress(course.id)}>
-              <View style={styles.courseCard}>
+          <View style={styles.grid}>
+            {getDisplayedCourses(ongoingCourses).map(course => (
+              <TouchableOpacity key={course.id} onPress={() => handleCoursePress(course.id)} style={styles.courseCard}>
                 <Image source={{ uri: `data:image/png;base64,${course.image}` }} style={styles.courseImage} />
                 <Text style={styles.courseName}>{course.name}</Text>
-              </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {ongoingCourses.length > numColumns * rowsToShow && (
+            <TouchableOpacity onPress={toggleExpand} style={styles.expandButton}>
+              <IconSymbol 
+                name={isExpanded ? "chevron.up" : "chevron.down"} 
+                size={24} 
+                color="#000" 
+              />
             </TouchableOpacity>
-          ))}
+          )}
         </View>
 
         <View style={styles.content}>
@@ -140,6 +169,47 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '100%',
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+    marginBottom: 24,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    gap: gap,
+    padding: gap,
+  },
+  courseCard: {
+    width: cardWidth,
+    height: cardWidth,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: gap,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  courseImage: {
+    width: '80%',
+    height: '70%',
+    resizeMode: 'contain',
+  },
+  courseName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingHorizontal: 4,
+  },
+  expandButton: {
+    alignItems: 'center',
+    padding: 8,
+    marginTop: 8,
   },
   label: {
     fontSize: 18,
@@ -149,21 +219,5 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     marginBottom: 16,
-  },
-  courseCard: {
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    alignItems: 'center',
-  },
-  courseImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 8,
-  },
-  courseName: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });

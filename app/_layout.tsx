@@ -26,13 +26,16 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   useEffect(() => {
+    // Move navigation logic inside setTimeout to ensure root layout is mounted
     if (!loading && !user) {
-      router.replace('/auth/login');
+      setTimeout(() => {
+        router.replace('/auth/login');
+      }, 0);
     }
   }, [loading, user]);
 
   if (!fontsLoaded || loading) {
-    return null;
+    return <Slot />;  // Return Slot even during loading
   }
 
   return (
