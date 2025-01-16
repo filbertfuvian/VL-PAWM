@@ -14,7 +14,7 @@ export default function CourseJoin() {
   const handleJoinCourse = async () => {
     if (!user) return;
     await joinCourse(user.uid, courseId);
-    navigation.navigate('courseDetails', { courseId });
+    navigation.navigate('CourseDetails', { courseId });
   };
 
   return (
