@@ -6,11 +6,20 @@ import { OpaqueColorValue, StyleProp, ViewStyle } from 'react-native';
 // Add your SFSymbol to MaterialIcons mappings here.
 const MAPPING = {
   'house.fill': 'home',
+  'book.fill': 'menu-book',
+  'clock.fill': 'schedule',
+  'gift.fill': 'redeem',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'book.fill': 'book', // Tambahkan ikon untuk course
-  'person.fill': 'person', // Tambahkan ikon untuk profile
+  'chevron.left': 'chevron-left',
+  'pencil': 'edit',
+  'envelope.fill': 'email',
+  'phone.fill': 'phone',
+  'bell.fill': 'notifications',
+  'person.fill': 'person',
+  'rectangle.portrait.and.arrow.right': 'logout',
+  'x': 'close',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
