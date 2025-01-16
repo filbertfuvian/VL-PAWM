@@ -41,7 +41,7 @@ export function useCourses() {
 
   async function joinCourse(userId: string, courseId: string) {
     try {
-      await setDoc(doc(db, 'users', userId, 'courses', courseId), { joined: true });
+      await setDoc(doc(db, 'users', userId, 'courses', courseId), { status: 'ongoing' });
     } catch (err) {
       console.error('Error joining course:', err);
     }
