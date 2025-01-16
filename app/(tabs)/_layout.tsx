@@ -7,6 +7,7 @@ import CourseScreen from './course';
 import ProfileScreen from './profile';
 import CourseDetails from '../course/courseDetails';
 import CourseJoin from '../course/courseJoin';
+import CourseModule from '../course/courseModule'
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 
@@ -19,6 +20,7 @@ function CourseStack() {
       <Stack.Screen name="Courses" component={CourseScreen} />
       <Stack.Screen name="CourseDetails" component={CourseDetails} />
       <Stack.Screen name="CourseJoin" component={CourseJoin} />
+      <Stack.Screen name="CourseModule" component={CourseModule} />
     </Stack.Navigator>
   );
 }
