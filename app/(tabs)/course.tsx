@@ -8,8 +8,9 @@ import {
   View,
   Text,
   Dimensions,
+  Platform,
   TextInput,
-  Alert,
+  Alert, // Imported Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,11 +21,11 @@ export default function CourseScreen() {
   const { user } = useAuth();
   const { courses, userCourseJoined } = useCourses();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('All'); // State for selected genre
-  const [availableCourses, setAvailableCourses] = useState<CourseData[]>([]); // Courses not yet joined
-
+  const [selectedGenre, setSelectedGenre] = useState('All');
   const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
   const gap = 16;
+
+  const genres = ['All', 'Matematika', 'Fisika', 'Kimia', 'Programming'];
 
   // Function to determine the number of columns based on window width
   const getNumColumns = (width: number) => {
@@ -51,7 +52,7 @@ export default function CourseScreen() {
     };
   }, []);
 
-  // Handle course press with genre check
+  // Updated handleCoursePress function
   const handleCoursePress = useCallback(
     async (courseId: string) => {
       if (!user) {
@@ -68,25 +69,8 @@ export default function CourseScreen() {
     [user, userCourseJoined, navigation]
   );
 
-  // Categorize courses by genre
-  const genres = [
-    { title: 'All', key: 'All' },
-    { title: 'Mathematics', key: 'Matematika' },
-    { title: 'Physics', key: 'Fisika' },
-    { title: 'Chemistry', key: 'Kimia' },
-    { title: 'Programming', key: 'Programming' },
-  ];
-
-  const filterCourses = useCallback(
-    (genreKey: string) => {
-      if (genreKey === 'All') return availableCourses;
-      return availableCourses.filter((course) => course.genre === genreKey);
-    },
-    [availableCourses]
-  );
-
   const renderCourseCard = useCallback(
-    (course: CourseData) => (
+    (course) => (
       <TouchableOpacity
         key={course.id}
         onPress={() => handleCoursePress(course.id)}
@@ -102,43 +86,35 @@ export default function CourseScreen() {
     [cardWidth, handleCoursePress]
   );
 
-  // Fetch available courses (not joined)
-  useEffect(() => {
-    const fetchAvailableCourses = async () => {
-      if (!user) {
-        setAvailableCourses([]);
-        return;
-      }
-
-      try {
-        const filtered = await Promise.all(
-          courses.map(async (course) => {
-            const joined = await userCourseJoined(user.uid, course.id);
-            return joined ? null : course;
-          })
-        );
-        setAvailableCourses(filtered.filter((course): course is CourseData => course !== null) as CourseData[]);
-      } catch (error) {
-        console.error('Error filtering courses:', error);
-        Alert.alert('Error', 'Failed to load courses.');
-      }
-    };
-
-    fetchAvailableCourses();
-  }, [courses, user, userCourseJoined]);
-
   // Filter courses based on search query and selected genre
-  const filteredCourses = filterCourses(selectedGenre).filter((course) =>
-    course.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCourses = courses.filter((course) => {
+    const matchesSearch = course.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesGenre =
+      selectedGenre === 'All' || course.genre === selectedGenre;
+    return matchesSearch && matchesGenre;
+  });
 
-  if (!user) {
-    return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Text style={styles.messageText}>Please log in to view courses.</Text>
-      </SafeAreaView>
-    );
-  }
+  const renderGenreButton = (genre) => (
+    <TouchableOpacity
+      key={genre}
+      style={[
+        styles.genreButton,
+        selectedGenre === genre && styles.genreButtonSelected,
+      ]}
+      onPress={() => setSelectedGenre(genre)}
+    >
+      <Text
+        style={[
+          styles.genreButtonText,
+          selectedGenre === genre && styles.genreButtonTextSelected,
+        ]}
+      >
+        {genre}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -159,61 +135,19 @@ export default function CourseScreen() {
 
         {/* Genre Filter Buttons */}
         <View style={styles.genreContainer}>
-          {genres.map((genre) => (
-            <TouchableOpacity
-              key={genre.key}
-              style={[
-                styles.genreButton,
-                selectedGenre === genre.key && styles.genreButtonActive,
-              ]}
-              onPress={() => setSelectedGenre(genre.key)}
-            >
-              <Text
-                style={[
-                  styles.genreButtonText,
-                  selectedGenre === genre.key && styles.genreButtonTextActive,
-                ]}
-              >
-                {genre.title}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {genres.map((genre) => renderGenreButton(genre))}
         </View>
 
         {/* Courses Grid */}
         <View style={styles.gridContainer}>
-          {filteredCourses.length > 0 ? (
-            filteredCourses.map((course) => renderCourseCard(course))
-          ) : (
-            <Text style={styles.noCoursesText}>No courses available.</Text>
-          )}
+          {filteredCourses.map((course) => renderCourseCard(course))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-interface CourseData {
-  id: string;
-  name: string;
-  image: string;
-  genre: string;
-  description: string; // Added description field
-}
-
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#E5E5E5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  messageText: {
-    fontSize: 18,
-    color: '#333',
-    textAlign: 'center',
-  },
   container: {
     flex: 1,
     backgroundColor: '#E5E5E5',
@@ -231,7 +165,7 @@ const styles = StyleSheet.create({
     color: '#FFB703',
   },
   contentContainer: {
-    padding: 8,
+    padding: 16,
   },
   searchContainer: {
     marginBottom: 16,
@@ -249,30 +183,36 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  genreContainer: { // Genre filter buttons container
+  genreContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     marginBottom: 16,
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 4,
   },
   genreButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#fff',
-    margin: 4,
+    backgroundColor: '#f0f0f0',
+    marginHorizontal: 4,
+    marginBottom: 8,
     borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  genreButtonSelected: {
+    backgroundColor: '#14213D',
     borderColor: '#14213D',
   },
-  genreButtonActive: {
-    backgroundColor: '#14213D',
-  },
   genreButtonText: {
+    color: '#333',
     fontSize: 14,
-    color: '#14213D',
+    fontWeight: '500',
   },
-  genreButtonTextActive: {
-    color: '#fff',
+  genreButtonTextSelected: {
+    color: '#FFB703',
+    fontWeight: '600',
   },
   gridContainer: {
     flexDirection: 'row',
@@ -302,11 +242,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#14213D',
     textAlign: 'center',
-  },
-  noCoursesText: {
-    fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 20,
   },
 });
