@@ -1,50 +1,19 @@
-# Welcome to your Expo app 👋
+# Welcome to Inspira Lab! 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## What is Inspira Lab?
+Inspira Lab is a virtual learning platform developed by **Lutfi Khairul Amal (18222018)** and **Filbert Fuvian (18222024)**. Our mission is to provide a centralized, flexible, and accessible educational experience for modern learners. With Inspira Lab, you can access a variety of courses anytime and anywhere using your preferred device, be it a mobile phone or a web browser.
 
-## Get started
+## How to Run Inspira Lab
 
-1. Install dependencies
+### 1. Mobile App
 
-   ```bash
-   npm install
-   ```
+1. **Download the APK in your mobile phone**:
+   [https://github.com/filbertfuvian/VL-PAWM/tags](#)
+2. **Install the APK**:
+3. **Open the App**:
 
-2. Start the app
+### 2. Web Browser
 
-   ```bash
-    npx expo start
-   ```
+1. **Open link in your browser**:
+   [inspiralab.netlify.app](#)
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
