@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,6 +15,7 @@ import UpdateModal from '@/components/UpdateModal';
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Profile() {
   const auth = getAuth();
@@ -32,25 +33,28 @@ export default function Profile() {
   const [modalValue, setModalValue] = useState('');
   const [fieldToUpdate, setFieldToUpdate] = useState('');
 
-  // Fetch user data on mount or when user changes
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      try {
-        const data = await getUser(user.uid);
-        setUserData({
-          name: data?.name || '',
-          email: user.email || '',
-          profilePicture: data?.profilePicture || '',
-          phoneNumber: data?.phoneNumber || '',
-          address: data?.address || '',
-        });
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-    fetchUserData();
+  // Fetch user data
+  const fetchUserData = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await getUser(user.uid);
+      setUserData({
+        name: data?.name || '',
+        email: user.email || '',
+        profilePicture: data?.profilePicture || '',
+        phoneNumber: data?.phoneNumber || '',
+        address: data?.address || '',
+      });
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
   }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [fetchUserData])
+  );
 
   // Update profile field in the database and local state
   const handleUpdateProfile = async (field, value) => {
@@ -66,7 +70,7 @@ export default function Profile() {
   };
 
   // Handle profile picture change
-  const handleProfilePictureChange = async () => {
+  const handleProfilePictureChange = useCallback(async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
@@ -99,7 +103,7 @@ export default function Profile() {
       console.error('Error updating profile picture:', error);
       alert('Failed to update profile picture');
     }
-  };
+  }, [user]);
 
   // Open modal for updating fields
   const openModal = (title, placeholder, value, field) => {

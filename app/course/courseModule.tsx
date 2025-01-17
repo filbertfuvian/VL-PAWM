@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -8,58 +8,27 @@ import {
   ScrollView, 
   Platform 
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { getDoc, doc } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
+import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
-
-interface QuizData {
-  question: string;
-  answers: string[];
-  correct_answer: number;
-}
+import { useCourseModule } from '@/hooks/useCourseModule';
 
 export default function CourseModule() {
   const route = useRoute();
+  const navigation = useNavigation();
   const { courseId, moduleId } = route.params as { courseId: string; moduleId: string };
 
-  const [module, setModule] = useState<any>(null);
-  const [quiz, setQuiz] = useState<QuizData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { module, quiz, loading, error, submitQuiz, isCompleted, refetch } = useCourseModule(courseId, moduleId);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (refetch) {
+        refetch();
+      }
+    }, [refetch])
+  );
+
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({});
   const [score, setScore] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchModuleData = async () => {
-      try {
-        const moduleDoc = await getDoc(doc(db, 'courses', courseId, 'modul', moduleId));
-        if (moduleDoc.exists()) {
-          const moduleData = moduleDoc.data();
-          setModule(moduleData);
-          
-          // Check if 'quiz' exists and is an array
-          if (moduleData.quiz && Array.isArray(moduleData.quiz)) {
-            const quizData: QuizData[] = moduleData.quiz.map((q: any) => ({
-              question: q.question,
-              answers: q.answers,
-              correct_answer: q.correct_answer,
-            }));
-            setQuiz(quizData);
-          } else {
-            console.warn('No quiz data found or quiz is not an array.');
-          }
-        } else {
-          console.warn('Module document does not exist.');
-        }
-      } catch (err) {
-        console.error('Error fetching module data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchModuleData();
-  }, [courseId, moduleId]);
 
   const handleAnswerSelect = (questionIndex: number, optionIndex: number) => {
     setSelectedAnswers(prev => ({
@@ -68,108 +37,125 @@ export default function CourseModule() {
     }));
   };
 
-  const handleSubmitQuiz = () => {
-    let calculatedScore = 0;
-    quiz.forEach((q, index) => {
-      if (selectedAnswers[index] === q.correct_answer) { 
-        calculatedScore += 1;
-      }
-    });
-    setScore(calculatedScore);
+  const handleSubmitQuiz = async () => {
+    const calculatedScore = await submitQuiz(selectedAnswers);
+    if (calculatedScore !== null) {
+      setScore(calculatedScore);
+    }
   };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  if (!module) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Module not found.</Text>
-      </View>
-    );
-  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Header with Back Button */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{module.name}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{module ? module.name : 'Course Module'}</Text>
       </View>
-      
-      <View style={styles.contentContainer}>
-        <Text style={styles.moduleTitle}>Content</Text>
-        
-        {module.contentLink ? (
-          Platform.OS === 'web' ? (
-            <View style={styles.pdfContainerWeb}>
-              <iframe 
-                src={module.contentLink} 
-                style={styles.iframe}
-                title="Module PDF"
-              />
-            </View>
-          ) : (
-            <View style={styles.pdfContainer}>
-              <WebView 
-                source={{ uri: module.contentLink }} 
-                style={styles.webview} 
-              />
-            </View>
-          )
-        ) : (
-          <Text style={styles.noPdfText}>No PDF available for this module.</Text>
-        )}
-  
-        {quiz.length > 0 && (
-          <View style={styles.quizContainer}>
-            <Text style={styles.quizHeader}>Quiz</Text>
-            {quiz.map((q, index) => (
-              <View key={index} style={styles.questionContainer}>
-                <Text style={styles.questionText}>{q.question}</Text>
-                {q.answers.map((option, optIndex) => (
-                  <TouchableOpacity
-                    key={optIndex}
-                    style={[
-                      styles.optionButton,
-                      selectedAnswers[index] === optIndex && styles.selectedOptionButton,
-                    ]}
-                    onPress={() => handleAnswerSelect(index, optIndex)}
-                  >
-                    <Text style={styles.optionText}>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            ))}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmitQuiz}>
-              <Text style={styles.submitButtonText}>Submit Answers</Text>
-            </TouchableOpacity>
-            {score !== null && (
-              <Text style={styles.scoreText}>
-                You scored {score} out of {quiz.length}
-              </Text>
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.loadingText}>Loading module...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : !module ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Module not found.</Text>
+        </View>
+      ) : (
+        <>
+          <View style={styles.contentContainer}>
+            <Text style={styles.moduleTitle}>Content</Text>
+            
+            {module.contentLink ? (
+              Platform.OS === 'web' ? (
+                <View style={styles.pdfContainerWeb}>
+                  <iframe 
+                    src={module.contentLink} 
+                    style={styles.iframe}
+                    title="Module PDF"
+                  />
+                </View>
+              ) : (
+                <View style={styles.pdfContainer}>
+                  <WebView 
+                    source={{ uri: module.contentLink }} 
+                    style={styles.webview} 
+                  />
+                </View>
+              )
+            ) : (
+              <Text style={styles.noPdfText}>No PDF available for this module.</Text>
             )}
           </View>
-        )}
-      </View>
+
+          {!isCompleted && quiz.length > 0 && (
+            <View style={styles.quizContainer}>
+              <Text style={styles.quizHeader}>Quiz</Text>
+              {quiz.map((q, index) => (
+                <View key={index} style={styles.questionContainer}>
+                  <Text style={styles.questionText}>{q.question}</Text>
+                  {q.answers.map((option, optIndex) => (
+                    <TouchableOpacity
+                      key={optIndex}
+                      style={[
+                        styles.optionButton,
+                        selectedAnswers[index] === optIndex && styles.selectedOptionButton,
+                      ]}
+                      onPress={() => handleAnswerSelect(index, optIndex)}
+                      disabled={score !== null}
+                    >
+                      <Text style={styles.optionText}>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ))}
+              {score === null ? (
+                <TouchableOpacity style={styles.submitButton} onPress={handleSubmitQuiz}>
+                  <Text style={styles.submitButtonText}>Submit Answers</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.scoreText}>
+                  You scored {score} out of {quiz.length}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {isCompleted && (
+            <Text style={styles.completedText}>You have completed this module.</Text>
+          )}
+        </>
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    padding: 16,
-    backgroundColor: '#E5E5E5',
-  },
   container: {
-    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+    flexGrow: 1,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
     backgroundColor: '#14213D',
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  backButtonText: {
+    color: '#FFB703',
+    fontSize: 16,
   },
   headerTitle: {
     fontSize: 24,
@@ -180,11 +166,31 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 16,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#14213D',
+    marginTop: 8,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+  },
+  contentContainer: {
+    marginBottom: 24,
   },
   moduleTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   pdfContainer: {
     height: 400,
@@ -222,10 +228,11 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
     marginBottom: 8,
+    color: '#14213D',
   },
   optionButton: {
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f0f0',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -234,6 +241,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
+    color: '#14213D',
   },
   submitButton: {
     padding: 16,
@@ -254,10 +262,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
-  errorText: {
-    fontSize: 16,
-    color: 'red',
+  completedText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    marginTop: 16,
     textAlign: 'center',
-    marginTop: 20,
   },
 });

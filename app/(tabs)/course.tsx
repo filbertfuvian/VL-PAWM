@@ -1,89 +1,114 @@
-import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, Image, View, Text, Dimensions, Platform, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  View,
+  Text,
+  Dimensions,
+  Platform,
+  TextInput,
+  Alert, // Imported Alert
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@/hooks/useAuth';
 import { useCourses } from '@/hooks/useCourses';
 
-const { width } = Dimensions.get('window');
-const numColumns = Platform.OS === 'web' ? 8 : 4;
-const rowsToShow = 8;
-const gap = 16;
-const cardWidth = (width - (gap * (numColumns + 1))) / numColumns;
-
 export default function CourseScreen() {
   const navigation = useNavigation();
-  const [searchQuery, setSearchQuery] = useState('');
   const { user } = useAuth();
   const { courses, userCourseJoined } = useCourses();
-  const [displayedRows, setDisplayedRows] = useState(rowsToShow);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
+  const gap = 16;
 
-  const handleCoursePress = async (courseId: string) => {
-    if (!user) return;
-    const isJoined = await userCourseJoined(user.uid, courseId);
-    if (isJoined) {
-      navigation.navigate('CourseDetails', { courseId });
-    } else {
-      navigation.navigate('CourseJoin', { courseId });
-    }
+  // Function to determine the number of columns based on window width
+  const getNumColumns = (width: number) => {
+    if (width >= 1200) return 6;
+    if (width >= 992) return 5;
+    if (width >= 768) return 4;
+    if (width >= 576) return 3;
+    return 2;
   };
 
-  const handleViewMore = () => {
-    setDisplayedRows(prev => prev + rowsToShow);
-  };
+  const [numColumns, setNumColumns] = useState(getNumColumns(windowWidth));
+  const cardWidth = (windowWidth - gap * (numColumns + 1)) / numColumns;
 
-  const filteredCourses = courses.filter(course =>
-    course.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    const handleChange = ({ window }: { window: any }) => {
+      setWindowWidth(window.width);
+      setNumColumns(getNumColumns(window.width));
+    };
+
+    const subscription = Dimensions.addEventListener('change', handleChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
+  // Updated handleCoursePress function
+  const handleCoursePress = useCallback(
+    async (courseId: string) => {
+      if (!user) {
+        Alert.alert('Authentication Required', 'Please log in to access this course.');
+        return;
+      }
+      const joined = await userCourseJoined(user.uid, courseId);
+      if (joined) {
+        navigation.navigate('CourseDetails', { courseId });
+      } else {
+        navigation.navigate('CourseJoin', { courseId });
+      }
+    },
+    [user, userCourseJoined, navigation]
   );
 
-  const getDisplayedCourses = () => {
-    return filteredCourses.slice(0, numColumns * displayedRows);
-  };
+  const renderCourseCard = useCallback(
+    (course) => (
+      <TouchableOpacity
+        key={course.id}
+        onPress={() => handleCoursePress(course.id)}
+        style={[styles.courseCard, { width: cardWidth, margin: gap / 2 }]}
+      >
+        <Image
+          source={{ uri: `data:image/png;base64,${course.image}` }}
+          style={styles.courseImage}
+        />
+        <Text style={styles.courseName}>{course.name}</Text>
+      </TouchableOpacity>
+    ),
+    [cardWidth, handleCoursePress]
+  );
 
-  const handleSearchChange = (query) => {
-    setSearchQuery(query);
-  };
+  // Filter courses based on search query
+  const filteredCourses = courses.filter((course) =>
+    course.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Courses</Text>
-        </View>
-      </View>
-
-      <View style={styles.searchBarContainer}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search courses..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Your Courses</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <View style={styles.grid}>
-          {getDisplayedCourses().map(course => (
-            <TouchableOpacity 
-              key={course.id} 
-              onPress={() => handleCoursePress(course.id)} 
-              style={styles.courseCard}
-            >
-              <Image 
-                source={{ uri: `data:image/png;base64,${course.image}` }} 
-                style={styles.courseImage} 
-              />
-              <Text style={styles.courseName}>{course.name}</Text>
-            </TouchableOpacity>
-          ))}
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search Courses..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
         </View>
-        {filteredCourses.length > numColumns * displayedRows && (
-          <TouchableOpacity 
-            style={styles.viewMoreButton} 
-            onPress={handleViewMore}
-          >
-            <Text style={styles.viewMoreText}>View More</Text>
-          </TouchableOpacity>
-        )}
+
+        {/* Courses Grid */}
+        <View style={styles.gridContainer}>
+          {filteredCourses.map((course) => renderCourseCard(course))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -97,43 +122,43 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     backgroundColor: '#14213D',
+    alignItems: 'center',
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFB703',
   },
-  searchBarContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#E5E5E5',
-  },
-  searchBar: {
-    height: 40,
-    borderColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    backgroundColor: '#fff',
-    marginTop: 15,
-  },
   contentContainer: {
     padding: 16,
   },
-  grid: {
+  searchContainer: {
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  searchInput: {
+    width: '100%',
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    gap: gap,
+    justifyContent: 'center',
   },
   courseCard: {
-    width: cardWidth,
-    height: cardWidth,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 8,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -142,13 +167,14 @@ const styles = StyleSheet.create({
   },
   courseImage: {
     width: '80%',
-    height: '70%',
+    height: 100,
     resizeMode: 'contain',
+    marginBottom: 12,
   },
   courseName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#14213D',
     textAlign: 'center',
-    paddingHorizontal: 4,
   },
 });

@@ -6,6 +6,7 @@ interface CourseData {
   id: string;
   name: string;
   image: string;
+  description: string; // Added description field
 }
 
 export function useCourses() {
@@ -21,6 +22,7 @@ export function useCourses() {
       const result = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
+        description: doc.data().description || '', // Ensure description is included
       })) as CourseData[];
       setCourses(result);
     } catch (err) {
