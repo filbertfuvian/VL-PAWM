@@ -1,22 +1,22 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'; // Use native-stack for more consistent web support
 import HomeScreen from './index';
 import CourseScreen from './course';
 import ProfileScreen from './profile';
 import CourseDetails from '../course/courseDetails';
 import CourseJoin from '../course/courseJoin';
-import CourseModule from '../course/courseModule'
+import CourseModule from '../course/courseModule';
 import CourseExam from '../course/courseExam';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 function CourseStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='Courses'>
-      <Stack.Screen name="Courses" component={CourseScreen} options={{ headerShown: false }}/>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Course">
+      <Stack.Screen name="Course" component={CourseScreen} />
       <Stack.Screen name="CourseDetails" component={CourseDetails} />
       <Stack.Screen name="CourseJoin" component={CourseJoin} />
       <Stack.Screen name="CourseModule" component={CourseModule} />

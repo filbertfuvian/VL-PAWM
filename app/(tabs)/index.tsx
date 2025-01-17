@@ -17,6 +17,7 @@ import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { useAuth } from '@/hooks/useAuth';
 import * as Progress from 'react-native-progress';
+import { Collapsible } from '@/components/Collapsible'; // <-- import Collapsible
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -24,7 +25,6 @@ export default function HomeScreen() {
   const [userName, setUserName] = useState('');
   const [ongoingCourses, setOngoingCourses] = useState<CourseData[]>([]);
   const [completedCourses, setCompletedCourses] = useState<CourseData[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -118,11 +118,8 @@ export default function HomeScreen() {
     navigation.navigate('CourseStack', { screen: 'CourseDetails', params: { courseId } });
   };
 
-  const handleSearch = (text: string) => setSearchQuery(text);
   const getDisplayedCourses = (courses: CourseData[]) => (isExpanded ? courses : courses.slice(0, numColumns * 2));
   const toggleExpand = () => setIsExpanded(!isExpanded);
-
-  const filteredOngoing = ongoingCourses.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   if (loading) {
     return (
@@ -136,22 +133,22 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Hello, {userName}</Text>
+        <Text style={styles.headerText}>InspiraLab</Text>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search Courses..."
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-        </View>
+      <ScrollView 
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+      >
+      <View style={styles.content}>
+        <Text style={styles.title}>Hello, {userName}</Text>
+      </View>
 
-        {/* Ongoing Courses */}
-        <Text style={styles.title}>Your Courses</Text>
+      <Text style={styles.title}>Your Courses</Text>
+      {ongoingCourses.length === 0 ? (
+        <Text style={styles.noneJoined}>No joined courses</Text>
+      ) : (
         <View style={styles.grid}>
-          {getDisplayedCourses(filteredOngoing).map(course => {
+          {getDisplayedCourses(ongoingCourses).map(course => {
             const progress = course.totalModules ? course.completedModules / course.totalModules : 0;
             const allModulesDone = course.completedModules === course.totalModules;
             const finalExamLeft = allModulesDone && !course.finalExamCompleted;
@@ -187,17 +184,19 @@ export default function HomeScreen() {
             );
           })}
         </View>
-        {filteredOngoing.length > numColumns * 2 && (
-          <TouchableOpacity onPress={toggleExpand}>
-            <Text style={styles.expandBtn}>{isExpanded ? 'Show Less' : 'Show More'}</Text>
-          </TouchableOpacity>
-        )}
+      )}
 
-        {/* Completed Courses */}
-        <Text style={styles.title}>Completed Courses</Text>
+      {ongoingCourses.length > numColumns * 2 && (
+        <TouchableOpacity onPress={toggleExpand}>
+          <Text style={styles.expandBtn}>{isExpanded ? 'Show Less' : 'Show More'}</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Completed courses as collapsible */}
+      <Collapsible title="Completed Courses">
         <View style={styles.grid}>
           {completedCourses.length ? (
-            completedCourses.map(course => (
+            completedCourses.map((course) => (
               <TouchableOpacity
                 key={course.id}
                 style={[styles.card, { width: cardWidth, margin: gap / 2 }]}
@@ -224,6 +223,7 @@ export default function HomeScreen() {
             <Text>No completed courses yet.</Text>
           )}
         </View>
+      </Collapsible>
       </ScrollView>
     </SafeAreaView>
   );
@@ -240,22 +240,47 @@ interface CourseData {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { padding: 16, backgroundColor: '#14213D' },
-  headerText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  content: { padding: 16 },
-  searchContainer: { marginBottom: 16 },
-  searchInput: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    elevation: 2,
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  title: { fontSize: 18, fontWeight: 'bold', marginTop: 16, marginBottom: 8 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+
+  contentContainer: {
+    flexGrow: 1,
+    padding: 8,
+    paddingBottom: 32, // Extra bottom padding for scroll
+  },
+  
+  header: {
+    paddingTop: 40, // Added top padding
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#14213D',
+  },
+  headerText: {
+    color: '#FFB703', // Updated header text color
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  content: {
+    padding: 8,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -264,10 +289,41 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     elevation: 3,
   },
-  image: { width: '80%', height: 80, resizeMode: 'contain', marginBottom: 8 },
-  courseName: { fontSize: 14, fontWeight: 'bold', color: '#333', marginBottom: 8 },
-  progressContainer: { width: '100%', alignItems: 'center' },
-  progressText: { marginTop: 4, fontSize: 12, color: '#555' },
-  finalExamText: { marginTop: 4, fontSize: 12, color: '#e53935', fontWeight: 'bold' },
-  expandBtn: { textAlign: 'center', color: '#007BFF', marginTop: 8 },
+  image: {
+    width: '80%',
+    height: 80,
+    resizeMode: 'contain',
+    marginBottom: 8,
+  },
+  courseName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  progressContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  progressText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#555',
+  },
+  finalExamText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#e53935',
+    fontWeight: 'bold',
+  },
+  expandBtn: {
+    textAlign: 'center',
+    color: '#007BFF',
+    marginTop: 8,
+  },
+  noneJoined: {
+    textAlign: 'center',
+    color: '#888',
+    marginBottom: 16,
+  },
 });

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCourseDetails } from '@/hooks/useCourseDetails';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function CourseDetails() {
   const route = useRoute();
@@ -48,7 +49,11 @@ export default function CourseDetails() {
       {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Back</Text>
+          <IconSymbol
+            name="chevron.left"
+            size={28}
+            color="#FFB703"
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{course ? course.name : 'Course Details'}</Text>
       </View>
@@ -125,7 +130,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingTop: 40, 
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     backgroundColor: '#14213D',
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,

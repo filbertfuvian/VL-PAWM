@@ -145,7 +145,7 @@ export default function CourseScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Your Courses</Text>
+        <Text style={styles.headerText}>Available Courses</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
@@ -195,13 +195,11 @@ export default function CourseScreen() {
   );
 }
 
-// Define the CourseData interface
 interface CourseData {
   id: string;
   name: string;
   image: string;
   genre: string;
-  // Add other fields as necessary
 }
 
 const styles = StyleSheet.create({
@@ -222,7 +220,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E5E5',
   },
   header: {
-    padding: 16,
+    paddingTop: 40, 
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     backgroundColor: '#14213D',
     alignItems: 'center',
   },

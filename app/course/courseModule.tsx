@@ -11,6 +11,7 @@ import {
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { WebView } from 'react-native-webview';
 import { useCourseModule } from '@/hooks/useCourseModule';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function CourseModule() {
   const route = useRoute();
@@ -46,10 +47,13 @@ export default function CourseModule() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Back</Text>
+          <IconSymbol
+            name="chevron.left"
+            size={28}
+            color="#FFB703"
+          />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{module ? module.name : 'Course Module'}</Text>
       </View>
@@ -138,14 +142,15 @@ export default function CourseModule() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
     backgroundColor: '#fff',
     flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingTop: 40, 
+    paddingBottom: 16,
+    paddingHorizontal: 16,
     backgroundColor: '#14213D',
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
