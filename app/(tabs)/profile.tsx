@@ -206,20 +206,17 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  contentContainer: {
-    padding: 16,
-    paddingTop: 40,
+    backgroundColor: '#E5E5E5',
+    
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    padding: 16,
+    backgroundColor: '#14213D',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#FFB703',
   },
   profileInfo: {
     alignItems: 'center',
@@ -229,6 +226,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    marginTop: 20,
     marginBottom: 10,
   },
   name: {
@@ -242,6 +240,8 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 16,
+    color: '#14213D',
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   sectionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
@@ -260,6 +260,7 @@ const styles = StyleSheet.create({
   sectionButtonText: {
     fontSize: 16,
     marginLeft: 10,
+    color: '#14213D',
   },
   icon: {
     width: 24,

@@ -39,10 +39,19 @@ export default function CourseScreen() {
     return filteredCourses.slice(0, numColumns * displayedRows);
   };
 
+  const handleSearchChange = (query) => {
+    setSearchQuery(query);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Courses</Text>
+      <View style={styles.headerContainer}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Courses</Text>
+        </View>
+      </View>
+
+      <View style={styles.searchBarContainer}>
         <TextInput
           style={styles.searchBar}
           placeholder="Search courses..."
@@ -50,6 +59,7 @@ export default function CourseScreen() {
           onChangeText={setSearchQuery}
         />
       </View>
+
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.grid}>
           {getDisplayedCourses().map(course => (
@@ -82,25 +92,30 @@ export default function CourseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E5E5E5',
   },
   header: {
     padding: 16,
-    backgroundColor: '#f9f9f9',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    backgroundColor: '#14213D',
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#FFB703',
+  },
+  searchBarContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#E5E5E5',
   },
   searchBar: {
     height: 40,
-    borderColor: '#ddd',
+    borderColor: '#fff',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
+    backgroundColor: '#fff',
+    marginTop: 15,
   },
   contentContainer: {
     padding: 16,
@@ -114,7 +129,7 @@ const styles = StyleSheet.create({
   courseCard: {
     width: cardWidth,
     height: cardWidth,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 8,
     alignItems: 'center',
@@ -135,17 +150,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingHorizontal: 4,
-  },
-  viewMoreButton: {
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 16,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-  },
-  viewMoreText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
   },
 });

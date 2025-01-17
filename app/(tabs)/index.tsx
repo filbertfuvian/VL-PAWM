@@ -149,14 +149,16 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E5E5E5',
   },
   header: {
     padding: 16,
+    backgroundColor: '#14213D',
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#FFB703',
   },
   separator: {
     height: 1,
@@ -166,6 +168,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     padding: 16,
+    color: '#14213D',
   },
   content: {
     width: '100%',

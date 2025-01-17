@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
+  SafeAreaView,
   View, 
   Text, 
   StyleSheet, 
@@ -13,7 +14,7 @@ import { db } from '@/firebaseConfig';
 
 interface ExamData {
   id: string;
-  question: string;
+  questions: string;
   answers: string[];
   correct_answer: number;
 }
@@ -35,7 +36,7 @@ export default function CourseExam() {
         if (!examSnapshot.empty) {
           const examData: ExamData[] = examSnapshot.docs.map(doc => ({
             id: doc.id,
-            question: doc.data().question,
+            questions: doc.data().questions,
             answers: doc.data().answers,
             correct_answer: doc.data().correct_answer,
           }));
@@ -87,41 +88,58 @@ export default function CourseExam() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.examTitle}>Course Exam</Text>
-      {exams.map((exam, index) => (
-        <View key={exam.id} style={styles.questionContainer}>
-          <Text style={styles.questionText}>{`${index + 1}. ${exam.question}`}</Text>
-          {exam.answers.map((answer, answerIndex) => (
-            <TouchableOpacity
-              key={answerIndex}
-              style={[
-                styles.answerButton,
-                selectedAnswers[exam.id] === answerIndex && styles.selectedAnswerButton,
-              ]}
-              onPress={() => handleAnswerSelect(exam.id, answerIndex)}
-            >
-              <Text style={styles.answerText}>{answer}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ))}
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Submit Exam</Text>
-      </TouchableOpacity>
-      {score !== null && (
-        <Text style={styles.scoreText}>
-          You scored {score} out of {exams.length}
-        </Text>
-      )}
-    </ScrollView>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Course Exam</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        {exams.map((exam, index) => (
+          <View key={exam.id} style={styles.questionContainer}>
+            <Text style={styles.questionText}>{`${index + 1}. ${exam.questions}`}</Text>
+            {exam.answers.map((answer, answerIndex) => (
+              <TouchableOpacity
+                key={answerIndex}
+                style={[
+                  styles.answerButton,
+                  selectedAnswers[exam.id] === answerIndex && styles.selectedAnswerButton,
+                ]}
+                onPress={() => handleAnswerSelect(exam.id, answerIndex)}
+              >
+                <Text style={styles.answerText}>{answer}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))}
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit Exam</Text>
+        </TouchableOpacity>
+        {score !== null && (
+          <Text style={styles.scoreText}>
+            You scored {score} out of {exams.length}
+          </Text>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    padding: 16,
+    backgroundColor: '#14213D',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFB703',
+  },
   container: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#E5E5E5',
     flexGrow: 1,
   },
   loadingContainer: {
@@ -141,10 +159,11 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 18,
     marginBottom: 12,
+    color: '#14213D',
   },
   answerButton: {
     padding: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -153,6 +172,7 @@ const styles = StyleSheet.create({
   },
   answerText: {
     fontSize: 16,
+    color: '#14213D',
   },
   submitButton: {
     padding: 16,

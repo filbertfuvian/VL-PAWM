@@ -96,68 +96,85 @@ export default function CourseModule() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.moduleTitle}>{module.name}</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{module.name}</Text>
+      </View>
       
-      {module.contentLink ? (
-        Platform.OS === 'web' ? (
-          <View style={styles.pdfContainerWeb}>
-            <iframe 
-              src={module.contentLink} 
-              style={styles.iframe}
-              title="Module PDF"
-            />
-          </View>
-        ) : (
-          <View style={styles.pdfContainer}>
-            <WebView 
-              source={{ uri: module.contentLink }} 
-              style={styles.webview} 
-            />
-          </View>
-        )
-      ) : (
-        <Text style={styles.noPdfText}>No PDF available for this module.</Text>
-      )}
-
-      {quiz.length > 0 && (
-        <View style={styles.quizContainer}>
-          <Text style={styles.quizHeader}>Quiz</Text>
-          {quiz.map((q, index) => (
-            <View key={index} style={styles.questionContainer}>
-              <Text style={styles.questionText}>{q.question}</Text>
-              {q.answers.map((option, optIndex) => (
-                <TouchableOpacity
-                  key={optIndex}
-                  style={[
-                    styles.optionButton,
-                    selectedAnswers[index] === optIndex && styles.selectedOptionButton,
-                  ]}
-                  onPress={() => handleAnswerSelect(index, optIndex)}
-                >
-                  <Text style={styles.optionText}>{option}</Text>
-                </TouchableOpacity>
-              ))}
+      <View style={styles.contentContainer}>
+        <Text style={styles.moduleTitle}>Content</Text>
+        
+        {module.contentLink ? (
+          Platform.OS === 'web' ? (
+            <View style={styles.pdfContainerWeb}>
+              <iframe 
+                src={module.contentLink} 
+                style={styles.iframe}
+                title="Module PDF"
+              />
             </View>
-          ))}
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmitQuiz}>
-            <Text style={styles.submitButtonText}>Submit Answers</Text>
-          </TouchableOpacity>
-          {score !== null && (
-            <Text style={styles.scoreText}>
-              You scored {score} out of {quiz.length}
-            </Text>
-          )}
-        </View>
-      )}
+          ) : (
+            <View style={styles.pdfContainer}>
+              <WebView 
+                source={{ uri: module.contentLink }} 
+                style={styles.webview} 
+              />
+            </View>
+          )
+        ) : (
+          <Text style={styles.noPdfText}>No PDF available for this module.</Text>
+        )}
+  
+        {quiz.length > 0 && (
+          <View style={styles.quizContainer}>
+            <Text style={styles.quizHeader}>Quiz</Text>
+            {quiz.map((q, index) => (
+              <View key={index} style={styles.questionContainer}>
+                <Text style={styles.questionText}>{q.question}</Text>
+                {q.answers.map((option, optIndex) => (
+                  <TouchableOpacity
+                    key={optIndex}
+                    style={[
+                      styles.optionButton,
+                      selectedAnswers[index] === optIndex && styles.selectedOptionButton,
+                    ]}
+                    onPress={() => handleAnswerSelect(index, optIndex)}
+                  >
+                    <Text style={styles.optionText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ))}
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmitQuiz}>
+              <Text style={styles.submitButtonText}>Submit Answers</Text>
+            </TouchableOpacity>
+            {score !== null && (
+              <Text style={styles.scoreText}>
+                You scored {score} out of {quiz.length}
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  contentContainer: {
     padding: 16,
-    backgroundColor: '#fff',
-    flexGrow: 1,
+    backgroundColor: '#E5E5E5',
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    padding: 16,
+    backgroundColor: '#14213D',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFB703',
   },
   loadingContainer: {
     flex: 1,
@@ -208,7 +225,7 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     padding: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     borderRadius: 8,
     marginBottom: 8,
   },
