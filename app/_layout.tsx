@@ -35,7 +35,7 @@ export default function RootLayout() {
   }, [loading, user]);
 
   if (!fontsLoaded || loading) {
-    return <Slot />;  // Return Slot even during loading
+    return <Slot />;
   }
 
   return (

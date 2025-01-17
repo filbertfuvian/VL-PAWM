@@ -8,10 +8,8 @@ import {
   View,
   Text,
   Dimensions,
-  Platform,
   TextInput,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@/hooks/useAuth';
@@ -119,7 +117,7 @@ export default function CourseScreen() {
             return joined ? null : course;
           })
         );
-        setAvailableCourses(filtered.filter((course) => course !== null) as CourseData[]);
+        setAvailableCourses(filtered.filter((course): course is CourseData => course !== null) as CourseData[]);
       } catch (error) {
         console.error('Error filtering courses:', error);
         Alert.alert('Error', 'Failed to load courses.');
@@ -200,6 +198,7 @@ interface CourseData {
   name: string;
   image: string;
   genre: string;
+  description: string; // Added description field
 }
 
 const styles = StyleSheet.create({
