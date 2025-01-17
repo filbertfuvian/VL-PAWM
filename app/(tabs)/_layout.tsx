@@ -15,8 +15,8 @@ const Stack = createStackNavigator();
 
 function CourseStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Courses" component={CourseScreen} />
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName='Courses'>
+      <Stack.Screen name="Courses" component={CourseScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="CourseDetails" component={CourseDetails} />
       <Stack.Screen name="CourseJoin" component={CourseJoin} />
       <Stack.Screen name="CourseModule" component={CourseModule} />
