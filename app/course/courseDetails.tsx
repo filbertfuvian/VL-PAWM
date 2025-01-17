@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
+  SafeAreaView,
   View, 
   Text, 
   TouchableOpacity, 
@@ -59,44 +60,62 @@ export default function CourseDetails() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {course && (
-        <>
-          <Text style={styles.courseTitle}>{course.name}</Text>
-          <Text style={styles.courseDescription}>{course.description}</Text>
-          <Text style={styles.modulesHeader}>Modules</Text>
-          {modules.length > 0 ? (
-            modules.map((module) => (
-              <View key={module.id} style={styles.moduleContainer}>
-                <Text style={styles.moduleName}>{module.name}</Text>
-                <TouchableOpacity
-                  style={styles.viewModuleButton}
-                  onPress={() => handleViewModule(module.id)}
-                >
-                  <Text style={styles.buttonText}>View Module</Text>
-                </TouchableOpacity>
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noModulesText}>No modules available.</Text>
-          )}
-          {/* Start Exam Button */}
-          <TouchableOpacity
-            style={styles.startExamButton}
-            onPress={handleStartExam}
-          >
-            <Text style={styles.startExamButtonText}>Start Exam</Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </ScrollView>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Join Course</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        {course && (
+          <>
+            <Text style={styles.courseTitle}>{course.name}</Text>
+            <Text style={styles.courseDescription}>{course.description}</Text>
+            <Text style={styles.modulesHeader}>Modules</Text>
+            {modules.length > 0 ? (
+              modules.map((module) => (
+                <View key={module.id} style={styles.moduleContainer}>
+                  <Text style={styles.moduleName}>{module.name}</Text>
+                  <TouchableOpacity
+                    style={styles.viewModuleButton}
+                    onPress={() => handleViewModule(module.id)}
+                  >
+                    <Text style={styles.buttonText}>View Module</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noModulesText}>No modules available.</Text>
+            )}
+            {/* Start Exam Button */}
+            <TouchableOpacity
+              style={styles.startExamButton}
+              onPress={handleStartExam}
+            >
+              <Text style={styles.startExamButtonText}>Start Exam</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    padding: 16,
+    backgroundColor: '#14213D',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFB703',
+  },
   container: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#E5E5E5',
     flexGrow: 1,
   },
   courseTitle: {
