@@ -44,7 +44,8 @@
       },
       "eas": {
         "projectId": "6b5dee4b-97ae-49b9-a04a-aa99548f6c4d"
-      }
+      },
+      "EXPO_ROUTER_APP_ROOT": "app"
     }
   }
 }
